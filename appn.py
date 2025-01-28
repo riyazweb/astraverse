@@ -81,7 +81,7 @@ def save_video():
         print(f"Video processing complete: {video_file.uri}")
 
         # Generate content using the uploaded video
-        prompt = "Describe this video and answer only to the audio text if not audio text just describe it."
+        prompt = "answer to this user and tell me what you think in very short :"
         model = genai.GenerativeModel(model_name="models/gemini-1.5-flash")
 
         print("Making LLM inference request to Gemini...")
