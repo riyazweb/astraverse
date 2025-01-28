@@ -1,7 +1,7 @@
-flask
-
+Flask
 google-generativeai
 python-dotenv
 ffmpeg-python
 SpeechRecognition
 pyaudio
+pyngrok
