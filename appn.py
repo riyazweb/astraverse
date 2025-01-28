@@ -13,11 +13,9 @@ dotenv.load_dotenv()
 
 # Set up your API key
 GOOGLE_API_KEY = os.getenv('GOOGLE_API_KEY')
-NGROK_AUTHTOKEN = os.getenv('NGROK_AUTHTOKEN')
+
 genai.configure(api_key=GOOGLE_API_KEY)
 
-# Authenticate ngrok
-ngrok.set_auth_token(NGROK_AUTHTOKEN)
 
 # Function to clear the upload folder
 def clear_upload_folder():
@@ -110,24 +108,12 @@ def save_video():
     })
 
 if __name__ == '__main__':
-    logging.basicConfig(level=logging.INFO)
-    
-    try:
-        # Check if ngrok is already running
-        existing_tunnels = ngrok.get_tunnels()
-        if not existing_tunnels:
-            # Start a new ngrok tunnel
-            public_url = ngrok.connect(5000, bind_tls=True)
-            print(f" * ngrok tunnel \"{public_url}\" -> \"http://127.0.0.1:5000\"")
-        else:
-            print(" * Existing ngrok tunnel detected.")
-            public_url = existing_tunnels[0].public_url
+        # Expose the Flask app via Ngrok
+    from pyngrok import ngrok
 
-        app.run(debug=True, port=5000)
-    except PyngrokNgrokError as e:
-        print(f"ngrok Error: {e}")
-        print("Please ensure you have only one active ngrok session and try again.")
-    except KeyboardInterrupt:
-        print("Shutting down server...")
-        ngrok.kill()
-        print("Server stopped cleanly.")
+    # Create a tunnel to the Flask app
+    public_url = ngrok.connect(5000)
+    print("Ngrok tunnel URL:", public_url)
+
+    # Run the Flask app
+    app.run()

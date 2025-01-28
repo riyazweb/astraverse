@@ -3,5 +3,5 @@ google-generativeai
 python-dotenv
 ffmpeg-python
 SpeechRecognition
-pyaudio
 pyngrok
+flask-ngrok
