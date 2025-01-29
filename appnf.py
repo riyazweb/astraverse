@@ -83,16 +83,17 @@ def get_ollama_response(prompt, image_path):
         b64_image = base64.b64encode(img_file.read()).decode('utf-8')
 
     data = {
-        "model": OLLAMA_MODEL,
-        "prompt": prompt,
-        "stream": False,
-        "images": [b64_image],
-        "options": {
-            "temperature": 0.3,
-            "top_p": 0.9,
-            "num_ctx": 4096
-        }
-    }
+          "model": OLLAMA_MODEL,
+          "prompt": prompt,
+          "stream": False,
+          "images": [b64_image],
+          "options": {
+              "temperature": 0.3,
+              "top_p": 0.9,
+              "num_ctx": 4096
+          }
+      }
+  
 
     try:
         response = requests.post(url, json=data, timeout=90)
@@ -135,7 +136,7 @@ def analyze_video():
             return jsonify({"error": "Image processing failed"}), 500
 
         # Send frames to Ollama for analysis
-        prompt = "Analyze this video frame collage and describe:"
+        prompt = "View these frames as sequential video frames and describe the entire scene in just two lines based on the combined visuals.you should not reply like you seen frames reply like you seen something and done mention word frames dont mention anything about like :(this is a image with many combination of images) "
         analysis = get_ollama_response(prompt, combined_image)
 
         return jsonify({
