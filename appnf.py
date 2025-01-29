@@ -113,7 +113,7 @@ def clean_folders():
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    return render_template('indexf.html')
 
 @app.route('/analyze', methods=['POST'])
 def analyze_video():
