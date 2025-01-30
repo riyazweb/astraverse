@@ -136,7 +136,14 @@ def analyze_video():
             return jsonify({"error": "Image processing failed"}), 500
 
         # Send frames to Ollama for analysis
-        prompt = "View these frames as sequential video frames and describe the entire scene in just two lines based on the combined visuals.you should not reply like you seen frames reply like you seen something and done mention word frames dont mention anything about like :(this is a image with many combination of images) "
+        prompt = """Analyze this dynamic visual sequence as temporal moments from continuous motion. 
+        Describe the ongoing actions, environmental context, and their progression in two concise 
+        natural language sentences. Respond strictly as if observing real-time footage, never 
+        mentioning images/frames/visuals. Focus on: 
+        1. Movement progression between elements 
+        2. Temporal relationships 
+        3. Dynamic scene changes 
+        4. Continuous narrative flow reply in only 2 lines"""
         analysis = get_ollama_response(prompt, combined_image)
 
         return jsonify({
