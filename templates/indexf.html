@@ -1,302 +1,152 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>faytm</title>
-  <!-- Tailwind CSS CDN -->
+  <title>Mic-only Audio Recorder</title>
+  <!-- Tailwind CSS CDN (Optional) -->
   <script src="https://cdn.tailwindcss.com"></script>
-  
-  <!-- Custom Styles for Spinner and Response Message -->
   <style>
-    /* Spinner Animation */
-    .spinner {
-      border: 4px solid rgba(255, 255, 255, 0.3);
-      border-top: 4px solid #ffffff;
-      border-radius: 50%;
+    /* Simple layout */
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem;
+      font-family: sans-serif;
+      background-color: #111;
+      color: #eee;
+    }
+    #recordButton, #stopButton, #submitButton {
+      margin: 0.5rem;
+      padding: 0.75rem 1.5rem;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 1rem;
+      font-weight: 600;
+    }
+    #recordButton { background-color: #4ADE80; }
+    #stopButton { background-color: #FBBF24; }
+    #submitButton { background-color: #3B82F6; }
+    #spinner {
+      margin-top: 1rem;
+      display: none;
+    }
+    #spinner::after {
+      content: "";
+      display: inline-block;
       width: 24px;
       height: 24px;
+      border: 4px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top-color: #fff;
       animation: spin 1s linear infinite;
     }
-
-    /* Keyframes for Spinner Rotation */
     @keyframes spin {
       to { transform: rotate(360deg); }
     }
-
-    /* Main Container Styling */
-    .main-container {
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      padding: 1.5rem;
-      overflow-y: auto;
-    }
-
-    /* Webcam Container Styling with Increased Height */
-    .webcam-container {
-      flex: 0 0 74vh;
-      position: relative;
-      background-color: #000;
-      border: 2px solid #2d3748;
-      border-radius: 1rem;
-      overflow: hidden;
-      margin-bottom: 1.5rem;
-    }
-
-    /* Video Element Styling */
-    #webcam {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      /* Mute the video element to prevent audio playback */
-      muted: true;
-    }
-
-    /* Gemini Response Container Styling */
-    #geminiResponse {
+    #transcription {
       margin-top: 1rem;
+      background-color: rgba(255, 255, 255, 0.1);
+      border-radius: 4px;
       padding: 1rem;
-      background-color: rgba(255, 255, 255, 0.1);
-      border-radius: 0.5rem;
+      width: 80%;
+      max-width: 600px;
       word-wrap: break-word;
-      color: #fff;
-      text-align: center;
-    }
-
-    /* Message Styling */
-    #message {
-      margin-top: 1rem;
-      padding: 0.5rem 1rem;
-      background-color: rgba(255, 0, 0, 0.1);
-      border-left: 4px solid #f56565;
-      color: #f56565;
-      border-radius: 0.25rem;
-      display: none;
-    }
-
-    /* Camera Toggle Button Styling */
-    #cameraToggleButton {
-      position: absolute;
-      bottom: 4rem;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 32px;
-      height: 32px;
-      background-color: rgba(255, 255, 255, 0.1);
-      backdrop-filter: blur(10px);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border: none;
-      border-radius: 50%;
-      cursor: pointer;
-      transition: background-color 0.3s;
-    }
-
-    #cameraToggleButton:hover {
-      background-color: rgba(255, 255, 255, 0.2);
-    }
-
-    /* SVG Icon Styling */
-    .camera-icon {
-      width: 16px;
-      height: 16px;
-      fill: #ffffff;
     }
   </style>
 </head>
-<body class="bg-black">
-  <div class="main-container">
-    <!-- Webcam Container -->
-    <div class="webcam-container">
-      <video id="webcam" autoplay playsinline muted></video>
+<body>
+  <h1>Microphone Audio Recorder</h1>
 
-      <!-- Camera Toggle Button -->
-      <button
-        id="cameraToggleButton"
-        title="Switch Camera"
-        class="absolute bottom-16 left-1/2 transform -translate-x-1/2 w-8 h-8 bg-white/10 backdrop-blur-sm flex items-center justify-center hover:bg-white/20 transition-all rounded-full"
-      >
-        <!-- SVG Icon for Camera Switch -->
-        <?xml version="1.0" encoding="utf-8"?>
-        <!-- Generator: Adobe Illustrator 18.0.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
-        <?xml version="1.0" encoding="utf-8"?>
-        <!-- Generator: Adobe Illustrator 18.0.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
-        <svg version="1.1" id="Layer_1"
-             xmlns="http://www.w3.org/2000/svg"
-             xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
-             viewBox="0 0 20 20" enable-background="new 0 0 20 20" xml:space="preserve">
-          <g id="swap:_horizontal_1_">
-            <g>
-              <path fill="#FFFFFF" fill-rule="evenodd" clip-rule="evenodd"
-                    d="M16.02,10C16.01,10,16.01,10,16.02,10C16,10,16,10,16,10H16.02z M2,6h13.58
-                       l-2.29,2.29C13.1,8.48,12.99,8.73,12.99,9c0,0.55,0.45,1,1,1c0.28,0,0.53-0.11,0.71-0.29l4-4c0.18-0.18,0.29-0.43,0.29-0.71
-                       c0-0.28-0.11-0.53-0.29-0.71l-4-4C14.52,0.11,14.27,0,13.99,0c-0.55,0-1,0.45-1,1c0,0.28,0.11,0.53,0.29,0.71L15.58,4H2
-                       C1.45,4,1,4.45,1,5C1,5.55,1.45,6,2,6z M4,10H3.98C3.99,10,3.99,10,4,10C4,10,4,10,4,10z M18,14H4.42l2.29-2.29
-                       C6.9,11.52,7.01,11.27,7.01,11c0-0.55-0.45-1-1-1c-0.28,0-0.53,0.11-0.71,0.29l-4,4C1.12,14.47,1.01,14.72,1.01,15
-                       c0,0.28,0.11,0.53,0.29,0.71l4,4C5.48,19.89,5.73,20,6.01,20c0.55,0,1-0.45,1-1c0-0.28-0.11-0.53-0.29-0.71L4.42,16H18
-                       c0.55,0,1-0.45,1-1C19,14.45,18.55,14,18,14z"/>
-            </g>
-          </g>
-        </svg>
-      </button>
-
-      <!-- Single Toggle Button (Mic-Style) -->
-      <button
-        id="micButton"
-        class="absolute bottom-4 left-1/2 transform -translate-x-1/2 w-24 h-12 bg-white/10 backdrop-blur-sm flex items-center justify-center hover:bg-white/20 transition-all rounded-full"
-      >
-        <div id="micBars" class="flex space-x-1">
-          <div class="w-1.5 h-3 bg-white rounded-full mt-2"></div>
-          <div class="w-1.5 h-6 bg-white rounded-full"></div>
-          <div class="w-1.5 h-3 bg-white rounded-full mt-2"></div>
-        </div>
-      </button>
-    </div>
-
-    <!-- Submit Button Container -->
-    <div class="flex flex-col items-center mb-6">
-      <button
-        id="submitBtn"
-        class="bg-white text-black px-8 py-3 rounded-lg font-semibold hover:bg-gray-200 transition-all"
-      >
-        Submit
-      </button>
-      <div id="spinner" class="hidden mt-4">
-        <div class="spinner"></div>
-      </div>
-      <div id="message">Only 10 seconds are allowed for recording. Please try again.</div>
-    </div>
-
-    <div id="geminiResponse"></div>
+  <div>
+    <button id="recordButton">Record</button>
+    <button id="stopButton" disabled>Stop</button>
+    <button id="submitButton" disabled>Submit</button>
   </div>
 
-  <script>
-    // DOM Elements
-    const videoElement = document.getElementById('webcam');
-    const micButton = document.getElementById('micButton');
-    const micBars = document.getElementById('micBars');
-    const submitButton = document.getElementById('submitBtn');
-    const geminiResponse = document.getElementById('geminiResponse');
-    const spinner = document.getElementById('spinner');
-    const message = document.getElementById('message');
-    const cameraToggleButton = document.getElementById('cameraToggleButton');
+  <div id="spinner"></div>
+  <div id="transcription"></div>
 
+  <script>
     let mediaRecorder;
     let recordedChunks = [];
     let isRecording = false;
-    let recordingTimeout;
-    let currentStream;
-    let usingFrontCamera = false;
+    
+    const recordButton = document.getElementById('recordButton');
+    const stopButton = document.getElementById('stopButton');
+    const submitButton = document.getElementById('submitButton');
+    const spinner = document.getElementById('spinner');
+    const transcriptionDiv = document.getElementById('transcription');
 
-    // Stop recording
-    const stopRecording = () => {
-      if (isRecording) {
-        mediaRecorder.stop();
-        isRecording = false;
-        micBars.classList.remove('animate-pulse');
-      }
-      clearTimeout(recordingTimeout);
-    };
+    recordButton.addEventListener('click', async () => {
+      if (isRecording) return;
+      recordedChunks = [];
 
-    // Initialize camera
-    const initCamera = (useFront) => {
-      const constraints = {
-        video: { facingMode: useFront ? 'user' : 'environment' },
-        audio: true
-      };
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        mediaRecorder = new MediaRecorder(stream);
 
-      navigator.mediaDevices.getUserMedia(constraints)
-        .then(stream => {
-          if (currentStream) {
-            currentStream.getTracks().forEach(track => track.stop());
+        mediaRecorder.ondataavailable = (e) => {
+          if (e.data.size > 0) {
+            recordedChunks.push(e.data);
           }
-          currentStream = stream;
-          videoElement.srcObject = stream;
-          videoElement.muted = true;
+        };
 
-          mediaRecorder = new MediaRecorder(stream);
-
-          mediaRecorder.ondataavailable = (event) => {
-            if (event.data.size > 0) {
-              recordedChunks.push(event.data);
-            }
-          };
-
-          mediaRecorder.onstop = () => {
-            // No additional actions needed here
-          };
-        })
-        .catch(error => {
-          console.error('Error accessing webcam:', error);
-          alert('Could not access your camera or microphone. Please check your permissions.');
-        });
-    };
-
-    // Start with back camera
-    initCamera(usingFrontCamera);
-
-    // Toggle recording
-    micButton.addEventListener('click', () => {
-      if (!isRecording) {
-        recordedChunks = [];
         mediaRecorder.start();
         isRecording = true;
-        micBars.classList.add('animate-pulse');
-
-        recordingTimeout = setTimeout(() => {
-          stopRecording();
-          message.style.display = 'block';
-          setTimeout(() => {
-            message.style.display = 'none';
-          }, 3000);
-        }, 10000);
-      } else {
-        stopRecording();
+        recordButton.disabled = true;
+        stopButton.disabled = false;
+        submitButton.disabled = true;
+      } catch (err) {
+        console.error('Error accessing microphone:', err);
+        alert('Could not access the microphone. Please grant permissions.');
       }
     });
 
-    // Submit video
-    submitButton.addEventListener('click', () => {
+    stopButton.addEventListener('click', () => {
+      if (mediaRecorder && isRecording) {
+        mediaRecorder.stop();
+        isRecording = false;
+        recordButton.disabled = false;
+        stopButton.disabled = true;
+        submitButton.disabled = false;
+      }
+    });
+
+    submitButton.addEventListener('click', async () => {
       if (recordedChunks.length === 0) {
-        alert('No video recorded yet!');
+        alert('No audio recorded!');
         return;
       }
+      spinner.style.display = 'inline-block';
+      transcriptionDiv.textContent = '';
+      submitButton.disabled = true;
 
-      const blob = new Blob(recordedChunks, { type: 'video/webm' });
+      const audioBlob = new Blob(recordedChunks, { type: 'audio/webm' });
 
-      spinner.classList.remove('hidden');
-      geminiResponse.textContent = '';
+      try {
+        const response = await fetch('/upload_audio', {
+          method: 'POST',
+          headers: { 'Content-Type': 'audio/webm' },
+          body: audioBlob
+        });
 
-      // Send video to /analyze
-      fetch('/analyze', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'video/webm'
-        },
-        body: blob
-      })
-      .then(response => response.json())
-      .then(data => {
-        spinner.classList.add('hidden');
-        if (data.gemini_response) {
-          geminiResponse.textContent = data.gemini_response;
+        const data = await response.json();
+        spinner.style.display = 'none';
+        submitButton.disabled = false;
+
+        if (data.error) {
+          transcriptionDiv.textContent = `Error: ${data.error}`;
         } else {
-          geminiResponse.textContent = 'No Gemini response received.';
+          transcriptionDiv.textContent = `Transcription: ${data.transcription}`;
         }
-      })
-      .catch(error => {
-        spinner.classList.add('hidden');
-        geminiResponse.textContent = 'Error processing video.';
-        console.error('Error saving video:', error);
-      });
-    });
-
-    // Toggle camera
-    cameraToggleButton.addEventListener('click', () => {
-      usingFrontCamera = !usingFrontCamera;
-      initCamera(usingFrontCamera);
+      } catch (err) {
+        spinner.style.display = 'none';
+        transcriptionDiv.textContent = 'Error sending audio to server.';
+        console.error(err);
+      }
     });
   </script>
 </body>
