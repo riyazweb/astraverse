@@ -5,3 +5,4 @@ ffmpeg-python
 SpeechRecognition
 pyngrok
 flask-ngrok
+gunicorn
